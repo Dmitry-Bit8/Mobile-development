@@ -1,0 +1,55 @@
+import 'dart:io';
+
+void main() {
+  try {
+    print("Введите выражение (например, 2 + 3):");
+    String? expression = stdin.readLineSync();
+
+    if (expression == null || expression.isEmpty) {
+      throw Exception("Выражение не введено.");
+    }
+    List<String> parts = expression.split(" ");
+
+    if (parts.length != 3) {
+      throw Exception("Некорректный формат выражения. Используйте 'число оператор число'.");
+    }
+
+    double num1 = double.tryParse(parts[0]) ?? (throw Exception("Первое число некорректно."));
+    String operator = parts[1];
+    double num2 = double.tryParse(parts[2]) ?? (throw Exception("Второе число некорректно."));
+
+    double result;
+
+    switch (operator) {
+      case '+':
+        result = num1 + num2;
+        break;
+      case '-':
+        result = num1 - num2;
+        break;
+      case '*':
+        result = num1 * num2;
+        break;
+      case '/':
+        if (num2 == 0) {
+          throw Exception("Деление на ноль!");
+        }
+        result = num1 / num2;
+        break;
+      case '%':
+        result = num1 % num2;
+        break;
+      default:
+        throw Exception("Некорректный оператор!");
+    }
+
+    print("Результат: $result");
+    String message = result >= 0 ? "Результат положительный" : "Результат отрицательный";
+    print(message);
+
+  } catch (e) {
+    print("Ошибка: ${e}");
+  } finally {
+    print("Выполнение завершено.");
+  }
+}
