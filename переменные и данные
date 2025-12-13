@@ -1,0 +1,11 @@
+void main() {
+  int age = 33; 
+  double semesterGPA = 4.0; 
+  String name = "Дмитрий"; 
+  bool isStudent = true; 
+  print("Имя: $name (${name.runtimeType})");
+  print("Возраст: $age (${age.runtimeType})");
+  print("Средний балл: $semesterGPA (${semesterGPA.runtimeType})");
+  print("Студент: ${'да'} (${isStudent.runtimeType})");
+}
+
