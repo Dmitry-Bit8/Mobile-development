@@ -1,0 +1,193 @@
+
+import 'dart:io';
+
+class Matrix {
+  final List<List<double>> data;
+  final int rows;
+  final int cols;
+
+  Matrix(this.data)
+      : rows = data.length,
+        cols = data.isNotEmpty ? data[0].length : 0 {
+   
+    for (var row in data) {
+      if (row.length != cols) {
+        throw ArgumentError('Матрица должна быть прямоугольной (все строки одинаковой длины).');
+      }
+    }
+  }
+
+ 
+  factory Matrix.zeros(int rows, int cols) {
+    return Matrix(List.generate(rows, (_) => List.filled(cols, 0.0)));
+  }
+
+ 
+  void printMatrix() {
+    for (var row in data) {
+      print(row);
+    }
+  }
+
+
+  Matrix operator +(Matrix other) {
+    if (rows != other.rows || cols != other.cols) {
+      throw ArgumentError('Матрицы должны иметь одинаковые размеры для сложения.');
+    }
+
+    List<List<double>> resultData = List.generate(rows, (i) => List.generate(cols, (j) => data[i][j] + other.data[i][j]));
+    return Matrix(resultData);
+  }
+
+  Matrix operator -(Matrix other) {
+    if (rows != other.rows || cols != other.cols) {
+      throw ArgumentError('Матрицы должны иметь одинаковые размеры для вычитания.');
+    }
+
+    List<List<double>> resultData = List.generate(rows, (i) => List.generate(cols, (j) => data[i][j] - other.data[i][j]));
+    return Matrix(resultData);
+  }
+
+  Matrix operator *(num scalar) {
+    List<List<double>> resultData = List.generate(rows, (i) => List.generate(cols, (j) => data[i][j] * scalar));
+    return Matrix(resultData);
+  }
+
+  
+  Matrix multiplyMatrix(Matrix other) {
+    if (cols != other.rows) {
+      throw ArgumentError('Число столбцов первой матрицы должно быть равно числу строк второй матрицы для умножения.');
+    }
+
+    Matrix result = Matrix.zeros(rows, other.cols);
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < other.cols; j++) {
+        for (int k = 0; k < cols; k++) {
+          result.data[i][j] += data[i][k] * other.data[k][j];
+        }
+      }
+    }
+    return result;
+  }
+
+
+  Matrix transpose() {
+    List<List<double>> resultData = List.generate(cols, (i) => List.generate(rows, (j) => data[j][i]));
+    return Matrix(resultData);
+  }
+
+ 
+  double determinant() {
+    if (rows != cols) {
+      throw ArgumentError('Определитель можно вычислить только для квадратных матриц.');
+    }
+
+    if (rows == 1) {
+      return data[0][0];
+    }
+
+    if (rows == 2) {
+      return data[0][0] * data[1][1] - data[0][1] * data[1][0];
+    }
+
+   
+    double det = 0;
+    for (int i = 0; i < cols; i++) {
+      det += data[0][i] * cofactor(0, i) * (i % 2 == 0 ? 1 : -1); 
+    }
+    return det;
+  }
+
+  
+  Matrix minor(int row, int col) {
+    List<List<double>> minorData = [];
+    for (int i = 0; i < rows; i++) {
+      if (i == row) continue;
+      List<double> minorRow = [];
+      for (int j = 0; j < cols; j++) {
+        if (j == col) continue;
+        minorRow.add(data[i][j]);
+      }
+      minorData.add(minorRow);
+    }
+    return Matrix(minorData);
+  }
+
+ 
+  double cofactor(int row, int col) {
+    return minor(row, col).determinant();
+  }
+}
+
+void main() {
+  
+  try {
+ 
+    List<List<double>> data1 = [[1.0, 2.0], [3.0, 4.0]];
+    List<List<double>> data2 = [[5.0, 6.0], [7.0, 8.0]];
+
+    Matrix matrix1 = Matrix(data1);
+    Matrix matrix2 = Matrix(data2);
+
+    print("Матрица 1:");
+    matrix1.printMatrix();
+
+    print("Матрица 2:");
+    matrix2.printMatrix();
+
+    Matrix sum = matrix1 + matrix2;
+    print("Сумма матриц:");
+    sum.printMatrix();
+
+    Matrix product = matrix1 * 2;
+    print("Матрица 1, умноженная на 2:");
+    product.printMatrix();
+
+    Matrix matrixMultiplication = matrix1.multiplyMatrix(matrix2);
+    print("Умножение матрицы 1 на матрицу 2:");
+    matrixMultiplication.printMatrix();
+
+    Matrix transposedMatrix = matrix1.transpose();
+    print("Транспонированная матрица 1:");
+    transposedMatrix.printMatrix();
+
+    print("Определитель матрицы 1: ${matrix1.determinant()}");
+
+    
+    print("\nВвод данных для новой матрицы:");
+    Matrix matrixFromInput = createMatrixFromInput();
+
+    print("Введенная матрица:");
+    matrixFromInput.printMatrix();
+
+  } catch (e) {
+    print("Ошибка: $e");
+  }
+}
+
+
+Matrix createMatrixFromInput() {
+  stdout.write("Введите количество строк: ");
+  int rows = int.parse(stdin.readLineSync()!);
+
+  stdout.write("Введите количество столбцов: ");
+  int cols = int.parse(stdin.readLineSync()!);
+
+  List<List<double>> data = [];
+  for (int i = 0; i < rows; i++) {
+    List<double> row = [];
+    stdout.write("Введите элементы строки ${i + 1} через пробел: ");
+    String? line = stdin.readLineSync();
+    if (line != null) {
+      List<String> elements = line.split(' ');
+      if (elements.length != cols) {
+        throw ArgumentError("Неверное количество элементов в строке.  Ожидается $cols.");
+      }
+      for (String element in elements) {
+        row.add(double.parse(element));
+      }
+    }
+    data.add(row);
+  }
+  return Matrix(data);
+}
